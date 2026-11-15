@@ -1,4 +1,4 @@
-# LJL Link
+# LJL Link (LJ LAN Link)
 
 > Free, open-source Mac app (Eclipse Public License 2.0) for DJs who play Serato DJ Pro. It runs from the club's USB stick without installation and sends deck data to LJ Link in the lighting booth: which track is on which deck, length, BPM, key, three-band waveforms and the running position (read from Serato's time display). Track names only if the DJ allows it. Status: alpha (tested locally, not yet in a club).
 

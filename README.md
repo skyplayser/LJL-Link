@@ -4,6 +4,8 @@
 
 <h1 align="center">LJL Link</h1>
 
+<p align="center"><b>LJ LAN Link</b></p>
+
 <p align="center">
   <b>Your Serato decks in the lighting booth.</b><br>
   Straight from the club's USB stick to LJ Link – nothing to install.
@@ -35,7 +37,7 @@
 </p>
 
 Serato DJ Pro has no public interface that LJ Link could use for decks, waveforms and position – so the lighting booth usually has no idea what is coming next.
-**LJL Link closes that gap.** It is a small Mac app that runs from the club's USB stick and sends the booth what is on your decks:
+**LJL Link – the LJ LAN Link – closes that gap.** It is a small Mac app that runs from the club's USB stick and sends the booth what is on your decks:
 which track is on which deck, its length, BPM and key, three-band waveforms and the running position. In the booth,
 [LJ Link](https://github.com/skyplayser/LJ-Link) shows your decks next to every other player, so lights and effects hit the drops
 and breaks.

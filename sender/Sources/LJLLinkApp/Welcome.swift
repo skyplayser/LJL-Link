@@ -13,8 +13,8 @@ struct WelcomePanel: View {
                 }
                 VStack(alignment: .leading, spacing: 4) {
                     Text(L.t("Willkommen bei LJL Link", "Welcome to LJL Link")).font(.title2.bold())
-                    Text(L.t("Damit die Lichttechnik in der Booth zu deiner Musik leuchten kann.",
-                             "So the lighting booth can light up to your music."))
+                    Text(L.t("LJ LAN Link – damit die Lichttechnik in der Booth zu deiner Musik leuchten kann.",
+                             "LJ LAN Link – so the lighting booth can light up to your music."))
                         .foregroundStyle(Palette.dim).fixedSize(horizontal: false, vertical: true)
                 }
             }
@@ -31,8 +31,8 @@ struct WelcomePanel: View {
                      text: L.t("Tracknamen gehen nur raus, wenn du es erlaubst – jederzeit umschaltbar. Installiert wird nichts, alles läuft vom USB-Stick des Clubs.",
                                "Track names only go out if you allow it – switch it any time. Nothing is installed, everything runs from the club's USB stick."))
                 Step(icon: "rectangle.dashed.badge.record", title: L.t("Zwei Fragen von macOS", "Two questions from macOS"),
-                     text: L.t("„Lokales Netzwerk“: damit LJL Link LJ Link in der Booth findet. „Bildschirmaufnahme“: LJL Link liest damit nur Seratos Zeitanzeige; nichts wird aufgezeichnet oder gesendet außer der Zeit (ohne läuft alles, nur ohne mitlaufende Position).",
-                               "“Local Network”: so LJL Link finds LJ Link in the booth. “Screen Recording”: LJL Link only reads Serato's time display with it; nothing is recorded or sent except the time (without it everything works, only without the running position)."))
+                     text: L.t("„Lokales Netzwerk“: damit LJL Link LJ Link in der Booth findet. „Bildschirmaufnahme“: LJL Link nutzt sie nur, um die Zeitanzeige im Serato-Fenster zu lesen (Einzelheiten in der Datenschutzerklärung); nichts wird gespeichert oder gesendet außer der Zeit (ohne läuft alles, nur ohne mitlaufende Position).",
+                               "“Local Network”: so LJL Link finds LJ Link in the booth. “Screen Recording”: LJL Link uses it only to read the time display in Serato's window (details in the privacy policy); nothing is stored or sent except the time (without it everything works, only without the running position)."))
                 Step(icon: "bubble.left.and.bubble.right", title: L.t("Chat mit der Booth", "Chat with the booth"),
                      text: L.t("Alle Programme der Suite im selben Netzwerk – LJ Link in der Booth, VJ-Link – sind automatisch in einem Chatraum. Ihr könnt euch schreiben, ohne über die Tanzfläche zu rufen. Abschaltbar.",
                                "Every suite program in the same network – LJ Link in the booth, VJ-Link – is in one chat room by itself. Write to each other instead of shouting across the dance floor. Can be switched off."))

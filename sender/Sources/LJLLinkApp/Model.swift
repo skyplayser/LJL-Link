@@ -12,7 +12,7 @@ enum L {
 @MainActor
 final class Model: ObservableObject {
     static let shared = Model()
-    static let version = "0.3.0"
+    static let version = "0.3.1"
 
     enum Phase: Equatable { case noClub, askNames, running }
     enum Link: Equatable { case connecting, connected, rejected, waiting }

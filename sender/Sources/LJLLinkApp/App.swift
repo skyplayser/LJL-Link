@@ -234,8 +234,8 @@ struct NamesQuestion: View {
             .controlSize(.large)
         }
         Panel {
-            Label(L.t("Die App steuert Serato nicht und greift nicht auf Controller oder MIDI zu. Sie liest Seratos Protokoll und die Zeitanzeige im Serato-Fenster. Installiert wird nichts.",
-                      "The app does not control Serato and never touches controllers or MIDI. It reads Serato's log and the time display in Serato's window. Nothing is installed."),
+            Label(L.t("Die App steuert Serato nicht und greift nicht auf Controller oder MIDI zu. Sie liest Seratos Logdatei und die Zeitanzeige im Serato-Fenster. Installiert wird nichts.",
+                      "The app does not control Serato and never touches controllers or MIDI. It reads Serato's log file and the time display in Serato's window. Nothing is installed."),
                   systemImage: "checkmark.shield")
                 .font(.system(size: 12)).foregroundStyle(Palette.dim).fixedSize(horizontal: false, vertical: true)
         }
@@ -360,8 +360,8 @@ struct ScreenPanel: View {
                          "Just keep Serato open. Other windows on top do not matter."))
                     .font(.system(size: 12)).foregroundStyle(Palette.dim)
             case .denied:
-                Text(L.t("Für die Position braucht die App die Erlaubnis zur Bildschirmaufnahme. Sie liest damit nur die Zeitanzeige im Serato-Fenster; nichts wird aufgezeichnet oder gesendet außer der Zeit.",
-                         "For the position the app needs permission to record the screen. It only reads the time display in Serato's window; nothing is recorded or sent except the time."))
+                Text(L.t("Für die Position braucht die App die Erlaubnis zur Bildschirmaufnahme. Sie nutzt sie nur, um die Zeitanzeige im Serato-Fenster zu lesen (Einzelheiten in der Datenschutzerklärung); nichts wird gespeichert oder gesendet außer der Zeit.",
+                         "For the position the app needs permission to record the screen. It uses it only to read the time display in Serato's window (details in the privacy policy); nothing is stored or sent except the time."))
                     .foregroundStyle(Palette.warn).fixedSize(horizontal: false, vertical: true)
                 HStack {
                     Button(L.t("Erlauben …", "Allow …")) { model.allowScreen() }.buttonStyle(.borderedProminent).tint(Palette.accent)
