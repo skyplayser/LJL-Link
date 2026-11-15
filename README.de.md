@@ -17,6 +17,7 @@
 
 <p align="center">
   <a href="https://github.com/skyplayser/LJL-Link/releases"><img alt="Aktuelles Release" src="https://img.shields.io/github/v/release/skyplayser/LJL-Link?include_prereleases&label=Release&color=FFB020"></a>
+  <a href="https://github.com/skyplayser/LJL-Link/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/skyplayser/LJL-Link/total?label=Downloads&color=FF5470"></a>
   <img alt="macOS 14+, Apple silicon und Intel" src="https://img.shields.io/badge/macOS%2014%2B-Apple%20silicon%20%7C%20Intel-3DDC84">
   <img alt="Kostenlos" src="https://img.shields.io/badge/Preis-kostenlos-B45CFF">
   <a href="LICENSE"><img alt="Lizenz: EPL-2.0" src="https://img.shields.io/badge/Lizenz-EPL--2.0-22C8F0"></a>
