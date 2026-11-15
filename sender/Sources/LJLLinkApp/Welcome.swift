@@ -139,8 +139,8 @@ struct ChatPanel: View {
                     .buttonStyle(.borderedProminent).tint(Palette.accent)
                     .disabled(nickDraft.trimmingCharacters(in: .whitespaces).isEmpty)
             }
-            Text(L.t("Steht bei jeder Nachricht, z. B. „DJ David (DJ Booth) · LJL Link“. Nur für diesen Start, nichts wird auf dem Mac gespeichert.",
-                     "Shown with every message, e.g. “DJ David (DJ Booth) · LJL Link”. Only for this start, nothing is stored on the Mac."))
+            Text(L.t("Steht bei jeder Nachricht, z. B. „DJ David (DJ Booth) · LJL Link“. Name, Position und Nachrichten sehen alle im Netzwerk, unverschlüsselt – schreib nichts Vertrauliches. Nur für diesen Start, nichts wird auf dem Mac gespeichert.",
+                     "Shown with every message, e.g. “DJ David (DJ Booth) · LJL Link”. Everyone in the network sees name, position and messages, unencrypted – write nothing confidential. Only for this start, nothing is stored on the Mac."))
                 .font(.system(size: 11)).foregroundStyle(Palette.dim).fixedSize(horizontal: false, vertical: true)
         }
         .onAppear { focused = true }
