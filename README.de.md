@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/skyplayser/LJL-Link/releases/latest"><img alt="Alpha für macOS herunterladen" src="https://img.shields.io/badge/Download-Alpha%20f%C3%BCr%20macOS-22C8F0?style=for-the-badge"></a>
+  <a href="https://skyplayser.github.io/Link-Suite/"><img alt="Alpha für macOS herunterladen" src="https://img.shields.io/badge/Download-Alpha%20f%C3%BCr%20macOS-22C8F0?style=for-the-badge"></a>
 </p>
 
 <p align="center">
@@ -177,7 +177,9 @@ Jeder geladene Track bekommt eine zufällige Kennung; der Dateipfad wird nie ges
 
 ## Installieren
 
-LJL Link aus dem [aktuellen Release](https://github.com/skyplayser/LJL-Link/releases/latest) laden und zusammen mit der
+> **Neu: Installieren und Aktualisieren über den [Link-Suite Launcher](https://skyplayser.github.io/Link-Suite/).** Launcher laden ([macOS Apple-Chip](https://github.com/skyplayser/Link-Suite/releases/latest/download/Link-Suite-macos-arm64.dmg) · [macOS Intel](https://github.com/skyplayser/Link-Suite/releases/latest/download/Link-Suite-macos-intel.dmg)), öffnen und bei LJL Link auf *Installieren* klicken. Der Launcher lädt LJL Link direkt aus den Releases dieses Repos, prüft die Datei und hält LJL Link und alle anderen Programme der Link-Suite aktuell.
+
+LJL Link mit dem Link-Suite Launcher laden (*Für den Stick laden …*) und zusammen mit der
 `club.json` des Clubs auf den USB-Stick legen (siehe unten).
 
 Die App ist **ad-hoc signiert, aber noch nicht bei Apple notarisiert**. Deshalb blockiert macOS eine aus dem Internet geladene
