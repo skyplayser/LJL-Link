@@ -1,25 +1,34 @@
 import Foundation
 
-/// The WebSocket connection to LJ Link. Tries the club's hosts in order, says hello, keeps the link alive with a ping
-/// every 5 s and reconnects after a loss. On every (re)connect it asks `resend` for the current deck state.
+/// The WebSocket connection to LJ Link. Tries the club's hosts in order (club.json, optional), then every LJ Link found
+/// by Bonjour, says hello, keeps the link alive with a ping every 5 s and reconnects after a loss. Without club.json an
+/// LJ Link may answer `pending` and ask the LJ (approval without club.json, docs/protocol.md). On every (re)connect it
+/// asks `resend` for the current deck state.
 public final class Connection: NSObject, URLSessionWebSocketDelegate {
     public enum State: Equatable, CustomStringConvertible {
         case connecting(String)
         case connected(club: String)
         case rejected(String)
         case waiting(String)
+        /// No LJ Link found in the network yet (and no club.json).
+        case searching
+        /// LJ Link asks the LJ to allow this Mac; the name of that LJ Link.
+        case pending(String)
         public var description: String {
             switch self {
             case .connecting(let h): return "verbinde mit \(h) …"
             case .connected(let c): return "verbunden mit LJ Link – \(c)"
             case .rejected(let r): return "abgelehnt (\(r))"
             case .waiting(let w): return "warte: \(w)"
+            case .searching: return "suche LJ Link im Netzwerk …"
+            case .pending(let n): return "warte auf Freigabe in der Booth (\(n))"
             }
         }
     }
 
-    private let config: ClubConfig
-    private let hello: () -> Message
+    private let config: ClubConfig?
+    /// The hello for one place: the club key (if any) and this Mac's pseudonym for that LJ Link (if it can approve).
+    private let hello: (_ key: String?, _ device: String?) -> Message
     private let resend: () -> [Message]
     private let onState: (State) -> Void
     private let queue = DispatchQueue(label: "ljlink.connection")
@@ -33,13 +42,21 @@ public final class Connection: NSObject, URLSessionWebSocketDelegate {
     private var triedInRound = 0
     private var refusedInRound: String?
     /// More places to try after the ones in club.json: LJ Links found via Bonjour (BoothFinder).
-    public var moreHosts: () -> [(host: String, port: Int)] = { [] }
+    public var moreHosts: () -> [Place] = { [] }
+    /// How the pseudonym for an LJ Link is made (tests replace it).
+    public var device: (_ booth: String) -> String? = { Pairing.device(booth: $0) }
     private var welcomed = false
+    /// LJ Link answered `pending`: the LJ is asked. Since when.
+    private var pendingSince: Date?
+    /// The place of the current attempt.
+    private var place: Place?
+    /// How long LJL Link waits for the LJ's answer (LJ Link itself gives up after 120 s).
+    public var pendingLimit: TimeInterval = 130
     private var stopped = false
     private var pingTimer: DispatchSourceTimer?
     private var lastPong = Date.distantPast
 
-    public init(config: ClubConfig, hello: @escaping () -> Message, resend: @escaping () -> [Message],
+    public init(config: ClubConfig?, hello: @escaping (_ key: String?, _ device: String?) -> Message, resend: @escaping () -> [Message],
                 onState: @escaping (State) -> Void) {
         self.config = config
         self.hello = hello
@@ -71,15 +88,21 @@ public final class Connection: NSObject, URLSessionWebSocketDelegate {
 
     private func connect() {
         guard !stopped else { return }
-        // The addresses from club.json first, then LJ Links found in the network (the booth's address may have changed).
-        var places = config.hosts.map { (host: $0, port: config.port) }
-        for p in moreHosts() where !places.contains(where: { $0.host == p.host && $0.port == p.port }) { places.append(p) }
+        // The addresses from club.json first, then LJ Links found in the network (the booth's address may have changed,
+        // or there is no club.json at all).
+        var places = (config?.hosts ?? []).map { Place(host: $0, port: config?.port ?? 8080) }
+        for p in moreHosts() {
+            if let i = places.firstIndex(where: { $0.host == p.host && $0.port == p.port }) { places[i] = p } else { places.append(p) }
+        }
         guard !places.isEmpty else {
+            onState(.searching)
             queue.asyncAfter(deadline: .now() + 3) { [weak self] in self?.connect() }
             return
         }
         placeCount = places.count
-        let (host, port) = places[hostIndex % places.count]
+        let p = places[hostIndex % places.count]
+        place = p
+        let (host, port) = (p.host, p.port)
         guard let url = URL(string: "ws://\(host):\(port)/sender") else {
             // An address that makes no URL: the next one (never stop trying).
             hostIndex += 1
@@ -87,6 +110,7 @@ public final class Connection: NSObject, URLSessionWebSocketDelegate {
             return
         }
         welcomed = false
+        pendingSince = nil
         onState(.connecting("\(host):\(port)"))
         var req = URLRequest(url: url)
         req.timeoutInterval = 5
@@ -94,7 +118,9 @@ public final class Connection: NSObject, URLSessionWebSocketDelegate {
         t.maximumMessageSize = 4 << 20
         task = t
         t.resume()
-        t.send(.string(hello().json)) { [weak self] err in
+        let key = config?.key
+        let dev = p.pair ? p.booth.flatMap { device($0) } : nil
+        t.send(.string(hello(key, dev).json)) { [weak self] err in
             if err != nil { self?.queue.async { self?.lost("\(host) nicht erreichbar") } }
         }
         receive(t)
@@ -120,14 +146,24 @@ public final class Connection: NSObject, URLSessionWebSocketDelegate {
         switch r {
         case .welcome(let club):
             welcomed = true
+            pendingSince = nil
             triedInRound = 0
             refusedInRound = nil
             lastPong = Date()
-            onState(.connected(club: club.isEmpty ? config.club : club))
+            onState(.connected(club: club.isEmpty ? (config?.club ?? place?.name ?? "LJ Link") : club))
             for m in resend() { sendNow(m) }
             startPing()
-        case .reject(let reason):
+        case .pending:
+            guard !welcomed else { return }
+            pendingSince = Date()
+            lastPong = Date()
+            onState(.pending(place?.name ?? place.map { "\($0.host)" } ?? "LJ Link"))
+            startPing()
+        case .reject(var reason):
+            // No club.json and an LJ Link that cannot approve yet: it is too old, not a wrong key.
+            if reason == "key", config == nil, place?.pair != true { reason = "old" }
             welcomed = false
+            pendingSince = nil
             onState(.rejected(reason))
             task?.cancel(with: .normalClosure, reason: nil)
             task = nil
@@ -146,8 +182,13 @@ public final class Connection: NSObject, URLSessionWebSocketDelegate {
         let t = DispatchSource.makeTimerSource(queue: queue)
         t.schedule(deadline: .now() + 5, repeating: 5)
         t.setEventHandler { [weak self] in
-            guard let self, self.welcomed else { return }
+            guard let self, self.welcomed || self.pendingSince != nil else { return }
             if Date().timeIntervalSince(self.lastPong) > 15 { self.lost("keine Antwort"); return }
+            if let since = self.pendingSince, Date().timeIntervalSince(since) > self.pendingLimit {
+                self.pendingSince = nil
+                self.lost("keine Freigabe")
+                return
+            }
             self.sendNow(.ping)
         }
         t.resume()
@@ -160,6 +201,7 @@ public final class Connection: NSObject, URLSessionWebSocketDelegate {
         task?.cancel(with: .abnormalClosure, reason: nil)
         task = nil
         welcomed = false
+        pendingSince = nil
         next(why: why, refused: nil)
     }
 
@@ -174,7 +216,8 @@ public final class Connection: NSObject, URLSessionWebSocketDelegate {
             if let r = refusedInRound {
                 refusedInRound = nil
                 onState(.rejected(r))
-                retry(after: r == "key" ? 60 : 10, why: "abgelehnt: \(r)", report: false)
+                // A wrong key, an LJ who said no or a too old LJ Link stay so for a while; full or no answer may change soon.
+                retry(after: ["key", "denied", "old"].contains(r) ? 60 : 10, why: "abgelehnt: \(r)", report: false)
             } else {
                 retry(after: 2, why: why)
             }

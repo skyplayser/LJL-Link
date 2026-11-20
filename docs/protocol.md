@@ -20,11 +20,12 @@ The sender only reports deck data; nothing sent this way can control LJ Link, Se
 ```json
 {"type":"hello","protocol":1,"key":"<club key from club.json>","name":"MacBook von Anna","software":"Serato DJ Pro 5.0.0","app":"0.3.0","names":false}
 {"type":"welcome","protocol":1,"club":"Testclub","sender":"s1"}
-{"type":"reject","reason":"key"}      // reason: key | protocol | full
+{"type":"reject","reason":"key"}      // reason: key | protocol | full | denied | timeout
 ```
 
-- `key`: must equal LJ Link's current club key (constant-time compare). A missing or wrong key → `reject key`.
-  (Pairing with a code for senders without a club stick comes later; v1 knows only the key.)
+- `key`: optional since LJL Link 0.4. If present and equal to LJ Link's current club key (constant-time compare) →
+  `welcome`. Without a valid key see *Approval without club.json* below; an LJ Link without that feature answers
+  `reject key`.
 - `protocol`: LJ Link accepts 1. Higher → `reject protocol`.
 - At most 4 senders at once → `reject full`.
 - `name`: shown in LJ Link ("MacBook von Anna · Deck 1"). Max 64 characters, LJ Link cuts longer names.
@@ -82,7 +83,60 @@ Answer to `ping`, so the sender can show "connected".
 LJ Link announces itself as `_ljlink._tcp` with TXT `sender=1`, `senderpath=/sender`. LJL Link tries the addresses
 from club.json first, then every LJ Link it finds this way (the booth computer may have a new address since the stick
 was prepared). A different club's LJ Link answers `reject key`; the next place is tried after 2 s (with a single place,
-a wrong key is tried again after 60 s). Note: the key goes to every LJ Link that announces `sender=1` (open decision). macOS asks for "Local Network".
+a wrong key is tried again after 60 s). Note: the key goes to every LJ Link that announces `sender=1` (accepted: internal technical network). macOS asks for "Local Network".
+
+## Approval without club.json (LJL Link 0.4, LJ Link 1.7.13)
+
+Without `club.json` LJL Link has no club key. It finds LJ Link by Bonjour and asks to be let in; the LJ allows it once
+with a click in LJ Link, and from then on LJ Link knows this Mac.
+
+**Bonjour TXT (new, additive):** `pair=1` (this LJ Link can approve senders), `booth=<id>` (16 hex, random per LJ Link
+install, stored in its settings; replaced together with the club key on "New key").
+
+**hello (new, optional field):**
+
+```json
+{"type":"hello","protocol":1,"device":"<32 hex>","name":"MacBook von Anna","software":"Serato DJ Pro 5.0.0","app":"0.4.0","names":false}
+```
+
+- `device`: a pseudonym of this Mac **for this one LJ Link**: the first 32 hex digits of
+  HMAC-SHA256(key = the Mac's hardware UUID, message = `"ljl-pair:" + booth`). Nothing is stored on the DJ's Mac, the
+  hardware UUID never leaves it, and two LJ Links get different values (one booth cannot pose as this Mac at another).
+  Only sent to an LJ Link that announces `pair=1` and `booth`. With a `key` from club.json it may be sent too.
+
+**LJ Link decides in this order:**
+
+1. `protocol` wrong → `reject protocol`.
+2. `key` valid → `welcome` (as before).
+   Neither `key` nor `device` (LJL Link 0.3 with an old stick) → always `reject key`, also when LJ Link is full.
+3. `device` in the list of approved Macs → `welcome` (name and last seen updated).
+4. Already 4 senders → `reject full`.
+5. `device` present, not approved:
+   - refused in the last 10 minutes → `reject denied` (no nagging);
+   - more than 2 requests already waiting → `reject full`;
+   - otherwise → `{"type":"pending"}` and LJ Link shows the request: *"MacBook von Anna" (192.168.1.34) wants to send
+     Serato decks – Allow / Deny*. Only on the booth computer itself or a device with control rights, never on a
+     tablet without them (like the club key).
+     - **Allow** → the Mac goes into the list (pseudonym, name, first and last seen) and the same connection gets
+       `welcome`. Deck messages follow as usual.
+     - **Deny** → `reject denied`, closed; refused for 10 minutes.
+     - No answer within 120 s → `reject timeout`, closed. The request disappears.
+     - The sender disconnects while waiting → the request disappears.
+
+While waiting the sender sends `ping` every 5 s and LJ Link answers `pong`; the 15-s silence rule applies as usual.
+Deck messages before `welcome` are still ignored.
+
+**Approved Macs in LJ Link:** a list in the settings next to the club key (name, last seen, *Remove*). *Remove*
+disconnects that Mac at once. *New key* empties the list and gives LJ Link a new `booth` id, so every approval and every
+old stick becomes invalid in one step. At most 32 entries; the oldest unused one makes room.
+
+**LJL Link:** tries the addresses from club.json first (with the key), then every LJ Link found by Bonjour. With
+`pending` it shows "Waiting for approval in the booth" and waits up to 130 s, then tries the next place. `denied` →
+next try at this place after 60 s. `reject key` from an LJ Link without `pair=1` and no club.json → "LJ Link in the
+booth is too old for approval without club.json".
+
+Known limit (same as with the key): the network is not encrypted. Someone in the same network who reads the traffic can
+copy the pseudonym of an approved Mac. The suite relies on the club's internal technical network.
 
 ## Chat
 

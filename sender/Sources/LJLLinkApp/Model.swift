@@ -12,16 +12,19 @@ enum L {
 @MainActor
 final class Model: ObservableObject {
     static let shared = Model()
-    static let version = "0.3.1"
+    static let version = "0.4.0"
 
-    enum Phase: Equatable { case noClub, askNames, running }
-    enum Link: Equatable { case connecting, connected, rejected, waiting }
+    enum Phase: Equatable { case askNames, running }
+    enum Link: Equatable { case connecting, connected, rejected, waiting, pending }
 
-    @Published var phase: Phase = .noClub
+    @Published var phase: Phase = .askNames
     @Published var names = false
     @Published var link: Link = .connecting
     @Published var linkText = ""
+    /// club.json from the club's stick: optional. Without it LJL Link finds LJ Link by Bonjour and the LJ allows it.
     @Published var club: ClubConfig?
+    /// The LJ Link this Mac is connected to (its club name), for the header.
+    @Published var boothName: String?
     @Published var decks: [Sender.DeckStatus] = []
     @Published var screen: Sender.ScreenState = .off
     @Published var seratoFound = true
@@ -55,10 +58,10 @@ final class Model: ObservableObject {
     private var timer: Timer?
 
     private init() {
-        // The club's stick: club.json next to the app. During development also LJL_CLUB=<file>.
+        // The club's stick: club.json next to the app (optional). During development also LJL_CLUB=<file>.
         if let path = ProcessInfo.processInfo.environment["LJL_CLUB"] { loadClub(URL(fileURLWithPath: path)) }
         if club == nil, let c = ClubConfig.load() { club = c }
-        phase = club == nil ? .noClub : .askNames
+        phase = .askNames
         startChat()
         // Development and tests: answer the question at start (LJL_NAMES=1 or 0).
         if phase == .askNames, let a = ProcessInfo.processInfo.environment["LJL_NAMES"] {
@@ -75,7 +78,13 @@ final class Model: ObservableObject {
         }
         clubError = nil
         club = c
-        if phase == .noClub { phase = .askNames }
+        // Already sending: start again with the club's key.
+        if let s = sender {
+            s.stop()
+            sender = nil
+            timer?.invalidate()
+            startSender()
+        }
     }
 
     func chooseClub() {
@@ -94,7 +103,7 @@ final class Model: ObservableObject {
     }
 
     private func startSender() {
-        guard sender == nil, let club else { return }
+        guard sender == nil else { return }
         guard let folder = SeratoLog.seratoFolder() else {
             // Serato never ran on this Mac (or another user): look again in a moment.
             seratoFound = false
@@ -135,8 +144,17 @@ final class Model: ObservableObject {
         case .connecting(let h):
             link = .connecting
             linkText = L.t("Suche LJ Link (\(h)) …", "Looking for LJ Link (\(h)) …")
+        case .searching:
+            link = .connecting
+            linkText = L.t("Suche LJ Link im Netzwerk … Der Mac muss im selben Netzwerk sein wie der Rechner in der Booth.",
+                           "Looking for LJ Link in the network … This Mac has to be in the same network as the booth computer.")
+        case .pending(let n):
+            link = .pending
+            linkText = L.t("Gefunden: \(n). Warte auf Freigabe in der Booth – die Lichttechnik klickt dort einmal auf „Erlauben“, danach kennt LJ Link diesen Mac.",
+                           "Found: \(n). Waiting for approval in the booth – the lighting tech clicks “Allow” there once; after that LJ Link knows this Mac.")
         case .connected(let c):
             link = .connected
+            boothName = c
             linkText = L.t("Verbunden mit LJ Link – \(c)", "Connected to LJ Link – \(c)")
         case .rejected(let r):
             link = .rejected
@@ -147,6 +165,12 @@ final class Model: ObservableObject {
                                         "LJ Link already has 4 senders. Trying again shortly …")
             case "protocol": linkText = L.t("Diese App passt nicht zur LJ-Link-Version in der Booth.",
                                             "This app does not match the LJ Link version in the booth.")
+            case "denied": linkText = L.t("In der Booth abgelehnt. Neuer Versuch in einer Minute – sprich am besten kurz mit der Lichttechnik.",
+                                          "Refused in the booth. Trying again in a minute – best have a quick word with the lighting tech.")
+            case "timeout": linkText = L.t("Keine Antwort aus der Booth. Neuer Versuch gleich …",
+                                           "No answer from the booth. Trying again shortly …")
+            case "old": linkText = L.t("LJ Link in der Booth kann LJL Link noch nicht ohne club.json annehmen. Bitte LJ Link aktualisieren – oder die club.json vom Club wählen.",
+                                       "LJ Link in the booth cannot accept LJL Link without club.json yet. Please update LJ Link – or choose the club's club.json.")
             default: linkText = L.t("LJ Link hat abgelehnt (\(r)).", "LJ Link refused (\(r)).")
             }
         case .waiting:

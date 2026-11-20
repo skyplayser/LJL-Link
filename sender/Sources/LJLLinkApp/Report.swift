@@ -56,6 +56,7 @@ extension Model {
             case .rejected: return "refused"
             case .waiting: return "not reachable"
             case .connecting: return "connecting"
+            case .pending: return "waiting for approval in the booth"
             }
         }()
         let screenState: String = {
@@ -70,7 +71,7 @@ extension Model {
         out.append("== Summary ==")
         let os = ProcessInfo.processInfo.operatingSystemVersion
         out.append("LJL Link \(Model.version) (Alpha), macOS \(os.majorVersion).\(os.minorVersion).\(os.patchVersion), \(arch)")
-        out.append("Phase: \(phase == .running ? "sending" : phase == .askNames ? "waiting for the track-name answer" : "no club.json")")
+        out.append("Phase: \(phase == .running ? "sending" : "waiting for the track-name answer")")
         if phase == .running {
             out.append("LJ Link: \(linkState)")
             out.append("Position: \(screenState)")
@@ -86,7 +87,7 @@ extension Model {
         if let c = club {
             out.append("Club: \(c.club), hosts \(c.hosts.joined(separator: ", ")), port \(c.port), key present (not shown)")
         } else {
-            out.append("Club: no club.json")
+            out.append("Club: no club.json (Bonjour and approval in the booth)\(boothName.map { ", connected to \($0)" } ?? "")")
         }
         out.append("Connection: \(linkText)")
         out.append("Serato: \(seratoFound ? "folder found" : "folder not found"), \(Report.seratoVersion.map { "Serato DJ Pro \($0) running" } ?? "not running")")

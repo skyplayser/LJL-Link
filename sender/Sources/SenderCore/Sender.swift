@@ -54,7 +54,7 @@ public final class Sender: @unchecked Sendable {  // shared state behind `lock`
     private var screenState = ScreenState.off
     private var stopped = false
 
-    public init(config: ClubConfig, seratoFolder: URL, names: Bool, computerName: String, software: String,
+    public init(config: ClubConfig?, seratoFolder: URL, names: Bool, computerName: String, software: String,
                 appVersion: String, readPositions: Bool = true,
                 onState: @escaping (Connection.State) -> Void, log: @escaping (String) -> Void) {
         follower = SeratoLogFollower(seratoFolder: seratoFolder)
@@ -63,14 +63,14 @@ public final class Sender: @unchecked Sendable {  // shared state behind `lock`
         self.log = log
         connection = Connection(
             config: config,
-            hello: { [unowned self] in
-                .hello(key: config.key, name: computerName, software: software, app: appVersion, names: self.namesOn) },
+            hello: { [unowned self] key, device in
+                .hello(key: key, device: device, name: computerName, software: software, app: appVersion, names: self.namesOn) },
             resend: { [unowned self] in self.currentState() },
             onState: onState)
         connection.moreHosts = { [finder] in finder.booths }
     }
 
-    /// LJ Links in the network (Bonjour), tried after the addresses in club.json.
+    /// LJ Links in the network (Bonjour), tried after the addresses in club.json (or alone without one).
     private let finder = BoothFinder()
 
     var namesOn: Bool { lock.lock(); defer { lock.unlock() }; return names }

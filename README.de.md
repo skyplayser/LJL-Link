@@ -8,7 +8,7 @@
 
 <p align="center">
   <b>Deine Serato-Decks in der Lichtbooth.</b><br>
-  Direkt vom USB-Stick des Clubs zu LJ Link – nichts installieren.
+  Von deinem Mac oder dem USB-Stick des Clubs zu LJ Link – die Booth findet es selbst.
 </p>
 
 <p align="center">
@@ -38,7 +38,7 @@
 </p>
 
 Serato DJ Pro bietet keine öffentliche Schnittstelle, über die LJ Link Decks, Waveforms und Position bekommen könnte – die Lichtbooth weiß deshalb meist nicht, was als Nächstes kommt.
-**LJL Link – der LJ LAN Link – schließt diese Lücke.** Die kleine Mac-App läuft vom USB-Stick des Clubs und schickt der Booth, was auf deinen Decks
+**LJL Link – der LJ LAN Link – schließt diese Lücke.** Die kleine Mac-App – aus dem Link-Suite Launcher oder direkt vom USB-Stick – findet LJ Link im Netzwerk und schickt der Booth, was auf deinen Decks
 liegt: welcher Track auf welchem Deck, Länge, BPM und Tonart, Waveforms in drei Bändern und die laufende Position. In der Booth
 zeigt [LJ Link](https://github.com/skyplayser/LJ-Link) deine Decks neben allen anderen Playern – so treffen Licht und Effekte die
 Drops und Breaks.
@@ -55,9 +55,9 @@ LJL Link liest auf deinem Mac mit – **passiv**: Es steuert Serato nicht und fa
 <tr>
 <td width="50%" valign="top">
 
-**🔌 Läuft vom USB-Stick**<br>
-Der Club legt LJL Link auf seinen Stick. Einstecken, App starten – installiert wird nichts. Am Ende *Beenden* (⌘Q) und den Stick
-abziehen; Fenster schließen reicht nicht, LJL Link sendet sonst aus der Menüleiste weiter.
+**🔌 Vom Mac oder vom USB-Stick**<br>
+Mit dem Link-Suite Launcher installieren oder direkt vom USB-Stick starten – LJL Link selbst installiert nichts. Am Ende
+*Beenden* (⌘Q); Fenster schließen reicht nicht, LJL Link sendet sonst aus der Menüleiste weiter.
 
 </td>
 <td width="50%" valign="top">
@@ -101,9 +101,9 @@ kein MIDI, kein Plug-in.
 <tr>
 <td valign="top">
 
-**📡 Findet die Booth**<br>
-Die `club.json` neben der App enthält die Adresse der Booth und den Club-Schlüssel. Hat der Booth-Rechner eine neue Adresse,
-findet LJL Link LJ Link per Bonjour im lokalen Netzwerk; der Schlüssel entscheidet.
+**📡 Findet die Booth selbst**<br>
+LJL Link sucht LJ Link im lokalen Netzwerk. Beim ersten Mal klickt die Lichttechnik in LJ Link einmal auf **Erlauben**, danach
+kennt LJ Link diesen Mac. Mit der `club.json` des Clubs verbindet es ohne Nachfrage.
 
 </td>
 <td valign="top">
@@ -136,7 +136,7 @@ Club-Schlüssel.
 
 ```mermaid
 flowchart LR
-  S["Serato DJ Pro<br/>auf dem Mac des DJs"] -->|"Protokoll · geladene Datei · Zeitanzeige<br/>(nur lesen)"| L["LJL Link<br/>vom USB-Stick"]
+  S["Serato DJ Pro<br/>auf dem Mac des DJs"] -->|"Protokoll · geladene Datei · Zeitanzeige<br/>(nur lesen)"| L["LJL Link<br/>auf dem Mac des DJs"]
   L -->|"Decks · BPM · Tonart<br/>Waveforms · Position"| J["LJ Link<br/>Lichtbooth"]
   J -->|Tempo| D["Lichtpult<br/>grandMA · Daslight · …"]
   J -->|"Tempo · Track"| V["VJ-Link<br/>Visuals"]
@@ -154,6 +154,7 @@ keine Telemetrie, keine Verbindung ins Internet.
 | Daten | An LJ Link |
 |---|---|
 | Name des Macs (aus den Systemeinstellungen), Version von LJL Link | ja – LJ Link zeigt damit, von wem die Decks kommen |
+| Ein Pseudonym dieses Macs (ein Code, aus seiner Hardware-Kennung berechnet, für jedes LJ Link ein anderer; die Hardware-Kennung selbst verlässt den Mac nie) | ja, wenn keine `club.json` da ist – LJ Link erkennt daran einen erlaubten Mac |
 | Deck-Nummer, Länge, BPM, Tonart | ja |
 | Waveforms (drei Bänder) | ja |
 | Laufende Position | ja, wenn *Bildschirmaufnahme* erlaubt ist – nur die Zeit, kein Bild |
@@ -170,17 +171,18 @@ Jeder geladene Track bekommt eine zufällige Kennung; der Dateipfad wird nie ges
 |---|---|
 | Mac mit macOS 14 oder neuer, Apple silicon oder Intel (eine Universal-App) | Alpha; getestet auf einem Mac mit Apple silicon und aktuellem macOS, noch nicht auf Intel oder älterem macOS |
 | Serato DJ Pro | Alpha, lokal getestet, noch nicht im Club |
-| [LJ Link](https://github.com/skyplayser/LJ-Link) in der Lichtbooth, ab Version 1.7.11 (sie hat den Eingang für LJL Link) | Alpha |
+| [LJ Link](https://github.com/skyplayser/LJ-Link) in der Lichtbooth, ab Version 1.7.13 (Freigabe ohne `club.json`; 1.7.11 und 1.7.12 nur mit `club.json`) | Alpha |
 | Mac und Booth im selben lokalen Netzwerk | nötig |
-| *Stick vorbereiten* in LJ Link (schreibt LJL Link und `club.json` auf den Stick) | geplant; bis dahin `club.json` von Hand |
+| `club.json` vom Club | optional – ohne sie erlaubt die Lichttechnik deinen Mac einmal in LJ Link |
+| *Stick vorbereiten* in LJ Link (schreibt LJL Link und `club.json` auf den Stick) | geplant |
 | Windows, andere DJ-Software | nicht unterstützt |
 
 ## Installieren
 
 > **Neu: Installieren und Aktualisieren über den [Link-Suite Launcher](https://skyplayser.github.io/Link-Suite/).** Launcher laden ([macOS Apple-Chip](https://github.com/skyplayser/Link-Suite/releases/latest/download/Link-Suite-macos-arm64.dmg) · [macOS Intel](https://github.com/skyplayser/Link-Suite/releases/latest/download/Link-Suite-macos-intel.dmg)), öffnen und bei LJL Link auf *Installieren* klicken. Der Launcher lädt LJL Link direkt aus den Releases dieses Repos, prüft die Datei und hält LJL Link und alle anderen Programme der Link-Suite aktuell.
 
-LJL Link mit dem Link-Suite Launcher laden (*Für den Stick laden …*) und zusammen mit der
-`club.json` des Clubs auf den USB-Stick legen (siehe unten).
+LJL Link mit dem Link-Suite Launcher installieren. Für einen USB-Stick mit dem Launcher laden (*Für den Stick laden …*) und auf
+den Stick legen; eine `club.json` des Clubs daneben ist optional (siehe [Freigabe und club.json](#freigabe-und-clubjson)).
 
 Die App ist **ad-hoc signiert, aber noch nicht bei Apple notarisiert**. Deshalb blockiert macOS eine aus dem Internet geladene
 Kopie beim ersten Start einmal („LJL Link“ nicht geöffnet):
@@ -201,22 +203,31 @@ Beim ersten Start stellt macOS zwei Fragen:
 
 ## Schnellstart
 
-1. **Stick vom Club:** Die Lichttechnik legt LJL Link und die `club.json` auf einen USB-Stick. Der Mac des DJs muss im selben
-   Netzwerk sein wie LJ Link.
-2. **Starten:** Stick einstecken, LJL Link starten, *Lokales Netzwerk* und *Bildschirmaufnahme* erlauben und die Frage nach den
-   Tracknamen beantworten.
-3. **Auflegen:** Tracks in Serato laden wie immer. Deine Decks erscheinen in LJ Link. Am Ende *Beenden* (⌘Q), dann den Stick
-   abziehen.
+1. **LJL Link holen:** mit dem Link-Suite Launcher oder auf dem USB-Stick des Clubs. Der Mac des DJs muss im selben Netzwerk
+   sein wie LJ Link.
+2. **Starten:** LJL Link starten, *Lokales Netzwerk* und *Bildschirmaufnahme* erlauben und die Frage nach den Tracknamen
+   beantworten.
+3. **Freigabe:** LJL Link findet LJ Link und fragt in der Booth an. Die Lichttechnik klickt in LJ Link einmal auf **Erlauben** –
+   danach ist dein Mac bekannt. Mit der `club.json` des Clubs entfällt dieser Schritt.
+4. **Auflegen:** Tracks in Serato laden wie immer. Deine Decks erscheinen in LJ Link. Am Ende *Beenden* (⌘Q) und den Stick
+   abziehen, falls du einen nutzt.
 
 Die ausführliche Anleitung steht im LJ-Link-Wiki: **[Serato DJ Pro](https://skyplayser.github.io/LJ-Link/de/wiki-serato.html#ljl-link)**
 und [Anwendungsfall: Serato auf dem DJ-Laptop](https://skyplayser.github.io/LJ-Link/de/wiki-case-serato.html). LJL Link hat kein
 eigenes Wiki.
 
-### club.json
+### Freigabe und club.json
 
-LJL Link sucht die `club.json` neben der App. Liegt keine dort, kannst du die Datei in der App auswählen. LJ Link schreibt sie,
-wenn es den Stick vorbereitet; bis diese Funktion erscheint, wird sie von Hand angelegt, wie es die Anleitung im LJ-Link-Wiki
-beschreibt. Das Format:
+**Ohne `club.json`** sucht LJL Link LJ Link per Bonjour im lokalen Netzwerk und bittet um Einlass. LJ Link (ab 1.7.13) zeigt die
+Anfrage am Booth-Rechner mit Name und Adresse des Macs, und die Lichttechnik klickt auf *Erlauben* oder *Ablehnen*. LJ Link
+erkennt einen erlaubten Mac an einem Pseudonym: einem Code, der aus der Hardware-Kennung des Macs berechnet wird und für jedes
+LJ Link anders ist. Auf deinem Mac wird dafür nichts gespeichert, und die Hardware-Kennung selbst verlässt ihn nicht. In den
+Einstellungen von LJ Link kann die Lichttechnik einen Mac jederzeit entfernen; *Neuer Schlüssel* entfernt alle. Sind zwei
+LJ Links im Netzwerk, fragt LJL Link eines nach dem anderen.
+
+**Mit `club.json`** verbindet LJL Link ohne Nachfrage. Es sucht die Datei neben der App; du kannst sie auch in der App
+auswählen. LJ Link schreibt sie, wenn es den Stick vorbereitet; bis diese Funktion erscheint, wird sie von Hand angelegt, wie es
+die Anleitung im LJ-Link-Wiki beschreibt. Das Format:
 
 ```json
 {

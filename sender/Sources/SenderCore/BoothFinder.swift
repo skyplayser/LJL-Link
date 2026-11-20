@@ -1,14 +1,31 @@
 import Foundation
 import Network
 
-/// Finds LJ Link in the local network via Bonjour (`_ljlink._tcp`, TXT `sender=1`), so LJL Link connects even when the
-/// booth computer's address changed since the stick was prepared (DHCP). The club key still decides: a different LJ Link
-/// answers `reject key`, and the next one is tried.
+/// An LJ Link LJL Link can send to: from club.json (address, port) or found by Bonjour (with what its TXT says).
+public struct Place: Equatable, Sendable {
+    public var host: String
+    public var port: Int
+    /// TXT `booth`: the id this LJ Link derives approvals from (protocol: approval without club.json).
+    public var booth: String?
+    /// TXT `pair=1`: this LJ Link can approve a Mac without the club key.
+    public var pair: Bool
+    /// Bonjour name, e.g. "LJ Link (booth-pc)".
+    public var name: String?
+    public init(host: String, port: Int, booth: String? = nil, pair: Bool = false, name: String? = nil) {
+        self.host = host; self.port = port; self.booth = booth; self.pair = pair; self.name = name
+    }
+}
+
+/// Finds LJ Link in the local network via Bonjour (`_ljlink._tcp`, TXT `sender=1`), so LJL Link connects without
+/// club.json, or when the booth computer's address changed since the stick was prepared (DHCP). LJ Link decides: with
+/// the club key, a Mac it approved before, or after the LJ allows it (TXT `pair=1`).
 public final class BoothFinder {
     private let queue = DispatchQueue(label: "ljlink.boothfinder")
     private var browser: NWBrowser?
     private var resolving: [NWEndpoint: NWConnection] = [:]
-    private var found: [String: (host: String, port: Int)] = [:]
+    private var found: [String: Place] = [:]
+    /// What the TXT record says, per endpoint, until the address is known.
+    private var txt: [String: (booth: String?, pair: Bool, name: String?)] = [:]
     private let lock = NSLock()
 
     public init() {}
@@ -16,10 +33,15 @@ public final class BoothFinder {
     /// Development: what Bonjour finds (LJL_DEBUG_BONJOUR=1).
     static let debug = ProcessInfo.processInfo.environment["LJL_DEBUG_BONJOUR"] == "1"
 
-    /// The LJ Links found so far, as "host:port" pairs (IPv4).
-    public var booths: [(host: String, port: Int)] {
+    /// Development and tests only: use just the LJ Link on this port (LJL_ONLY_PORT=8097), so a test never reaches the
+    /// live LJ Link on 8080.
+    static let onlyPort = ProcessInfo.processInfo.environment["LJL_ONLY_PORT"].flatMap { Int($0) }
+
+    /// The LJ Links found so far (IPv4).
+    public var booths: [Place] {
         lock.lock(); defer { lock.unlock() }
-        return found.values.sorted { $0.host < $1.host }
+        return found.values.filter { BoothFinder.onlyPort == nil || $0.port == BoothFinder.onlyPort }
+            .sorted { ($0.host, $0.port) < ($1.host, $1.port) }
     }
 
     public func start() {
@@ -31,7 +53,18 @@ public final class BoothFinder {
             guard let self else { return }
             for r in results {
                 if BoothFinder.debug { FileHandle.standardError.write(Data("bonjour result: \(r.endpoint) \(r.metadata)\n".utf8)) }
-                if case .bonjour(let txt) = r.metadata, txt["sender"] != "1" { continue }
+                var booth: String?, pair = false
+                if case .bonjour(let t) = r.metadata {
+                    if t["sender"] != "1" { continue }
+                    booth = t["booth"].flatMap { $0.isEmpty ? nil : String($0.prefix(64)) }
+                    pair = t["pair"] == "1"
+                }
+                var name: String?
+                if case .service(let n, _, _, _) = r.endpoint { name = n }
+                self.lock.lock()
+                self.txt["\(r.endpoint)"] = (booth, pair, name)
+                if var p = self.found["\(r.endpoint)"] { p.booth = booth; p.pair = pair; p.name = name; self.found["\(r.endpoint)"] = p }
+                self.lock.unlock()
                 self.resolve(r.endpoint)
             }
         }
@@ -59,7 +92,10 @@ public final class BoothFinder {
                 if case .hostPort(let host, let port) = c.currentPath?.remoteEndpoint, case .ipv4(let a) = host {
                     // "10.69.10.146%en8": the interface part is no valid part of a URL.
                     let h = "\(a)".components(separatedBy: "%")[0]
-                    self.lock.lock(); self.found["\(endpoint)"] = (h, Int(port.rawValue)); self.lock.unlock()
+                    self.lock.lock()
+                    let t = self.txt["\(endpoint)"]
+                    self.found["\(endpoint)"] = Place(host: h, port: Int(port.rawValue), booth: t?.booth, pair: t?.pair ?? false, name: t?.name)
+                    self.lock.unlock()
                 }
                 c.cancel()
             case .failed, .cancelled:

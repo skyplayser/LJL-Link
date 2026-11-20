@@ -134,7 +134,7 @@ case "watch":
         Thread.sleep(forTimeInterval: 0.5)
     }
 case "run":
-    // ljlink-sender run [--club club.json] [--host h --port p --key k] [--names]
+    // ljlink-sender run [--club club.json] [--host h --port p --key k] [--names]; without club.json: Bonjour and approval
     func opt(_ name: String) -> String? { args.firstIndex(of: name).flatMap { $0 + 1 < args.count ? args[$0 + 1] : nil } }
     var config: ClubConfig?
     if let path = opt("--club"), let d = FileManager.default.contents(atPath: path) {
@@ -144,7 +144,7 @@ case "run":
     } else {
         config = ClubConfig.load()
     }
-    guard let config else { print("no club.json and no --host/--key"); exit(1) }
+    if config == nil { print("no club.json: looking for LJ Link by Bonjour, approval in the booth") }
     guard let folder = SeratoLog.seratoFolder() else { print("no Serato folder in ~/Music/_Serato_"); exit(1) }
     let sender = Sender(config: config, seratoFolder: folder, names: args.contains("--names"),
                         computerName: Host.current().localizedName ?? "Mac", software: "Serato DJ Pro",

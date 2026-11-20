@@ -113,7 +113,6 @@ struct MainView: View {
             ScrollView {
                 VStack(spacing: 12) {
                     switch model.phase {
-                    case .noClub: WelcomePanel(); NoClubView()
                     case .askNames: WelcomePanel(); NamesQuestion()
                     case .running: RunningView()
                     }
@@ -166,7 +165,7 @@ struct Header: View {
                         .overlay(RoundedRectangle(cornerRadius: 3).stroke(Palette.warn.opacity(0.7)))
                         .help(L.t("Noch nicht im echten Club getestet.", "Not tested in a real club yet."))
                 }
-                Text(model.club.map { L.t("Club: \($0.club)", "Club: \($0.club)") } ?? L.t("Kein Club", "No club"))
+                Text((model.club?.club ?? model.boothName).map { L.t("Club: \($0)", "Club: \($0)") } ?? L.t("Ohne club.json", "Without club.json"))
                     .font(.system(size: 11)).foregroundStyle(Palette.dim)
             }
             Spacer()
@@ -185,11 +184,18 @@ struct LinkBadge: View {
         default: return Palette.warn
         }
     }
+    var label: String {
+        switch model.link {
+        case .connected: return L.t("Verbunden", "Connected")
+        case .rejected: return L.t("Abgelehnt", "Refused")
+        case .pending: return L.t("Warte auf Freigabe", "Waiting for approval")
+        default: return L.t("Suche LJ Link", "Looking for LJ Link")
+        }
+    }
     var body: some View {
         HStack(spacing: 6) {
             Circle().fill(color).frame(width: 7, height: 7)
-            Text(model.link == .connected ? L.t("Verbunden", "Connected")
-                 : model.link == .rejected ? L.t("Abgelehnt", "Refused") : L.t("Suche LJ Link", "Looking for LJ Link"))
+            Text(label)
                 .font(.system(size: 12, weight: .semibold)).foregroundStyle(color)
         }
         .padding(.horizontal, 10).padding(.vertical, 5)
@@ -197,18 +203,18 @@ struct LinkBadge: View {
     }
 }
 
-struct NoClubView: View {
+/// club.json is optional: with it LJL Link connects without asking the booth. Offered while not connected.
+struct ClubFileHint: View {
     @EnvironmentObject var model: Model
     var body: some View {
-        Panel {
-            Text(L.t("Keine club.json gefunden", "No club.json found")).font(.title3.bold())
-            Text(L.t("Die App sucht die Datei club.json neben sich auf dem USB-Stick. LJ Link legt sie dort an, wenn der Stick in der Booth vorbereitet wird. Ohne sie weiß die App nicht, wohin sie senden soll.",
-                     "The app looks for club.json next to itself on the USB stick. LJ Link puts it there when the stick is prepared in the booth. Without it the app does not know where to send."))
-                .foregroundStyle(Palette.dim).fixedSize(horizontal: false, vertical: true)
-            if let e = model.clubError { Text(e).foregroundStyle(Palette.bad) }
-            Button(L.t("club.json wählen …", "Choose club.json …")) { model.chooseClub() }
-                .buttonStyle(.borderedProminent).tint(Palette.accent)
+        HStack(spacing: 8) {
+            Text(L.t("Hat der Club dir eine club.json gegeben? Dann verbindet LJL Link ohne Freigabe.",
+                     "Did the club give you a club.json? Then LJL Link connects without approval."))
+                .font(.system(size: 12)).foregroundStyle(Palette.dim).fixedSize(horizontal: false, vertical: true)
+            Spacer()
+            Button(L.t("club.json wählen …", "Choose club.json …")) { model.chooseClub() }.controlSize(.small)
         }
+        if let e = model.clubError { Text(e).font(.system(size: 12)).foregroundStyle(Palette.bad) }
     }
 }
 
@@ -256,6 +262,7 @@ struct RunningView: View {
                 }
                 Spacer()
             }
+            if model.club == nil && model.link != .connected { ClubFileHint() }
         }
         Panel {
             HStack(alignment: .center, spacing: 12) {

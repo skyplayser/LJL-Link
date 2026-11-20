@@ -25,11 +25,11 @@ struct WelcomePanel: View {
                      text: L.t("LJL Link liest mit, welcher Track auf welchem Deck liegt, und die Zeitanzeige im Serato-Fenster. Serato, Controller und MIDI fasst es nicht an.",
                                "LJL Link reads which track is on which deck, and the time display in Serato's window. It never touches Serato, controllers or MIDI."))
                 Step(icon: "waveform", title: L.t("Die Booth sieht mit", "The booth follows along"),
-                     text: L.t("Waveform, Tempo, Tonart und Position deiner Decks erscheinen in LJ Link bei der Lichttechnik. So passen Licht und Effekte zu Drops und Breaks.",
-                               "Waveform, tempo, key and position of your decks show up in LJ Link at the lighting booth, so lights and effects match drops and breaks."))
+                     text: L.t("Waveform, Tempo, Tonart und Position deiner Decks erscheinen in LJ Link bei der Lichttechnik. LJL Link findet LJ Link im Netzwerk selbst; beim ersten Mal klickt die Lichttechnik einmal auf „Erlauben“.",
+                               "Waveform, tempo, key and position of your decks show up in LJ Link at the lighting booth. LJL Link finds LJ Link in the network by itself; the first time, the lighting tech clicks “Allow” once."))
                 Step(icon: "lock.shield", title: L.t("Du entscheidest", "You decide"),
-                     text: L.t("Tracknamen gehen nur raus, wenn du es erlaubst – jederzeit umschaltbar. Installiert wird nichts, alles läuft vom USB-Stick des Clubs.",
-                               "Track names only go out if you allow it – switch it any time. Nothing is installed, everything runs from the club's USB stick."))
+                     text: L.t("Tracknamen gehen nur raus, wenn du es erlaubst – jederzeit umschaltbar. LJL Link installiert nichts und läuft auch direkt vom USB-Stick.",
+                               "Track names only go out if you allow it – switch it any time. LJL Link installs nothing and also runs straight from a USB stick."))
                 Step(icon: "rectangle.dashed.badge.record", title: L.t("Zwei Fragen von macOS", "Two questions from macOS"),
                      text: L.t("„Lokales Netzwerk“: damit LJL Link LJ Link in der Booth findet. „Bildschirmaufnahme“: LJL Link nutzt sie nur, um die Zeitanzeige im Serato-Fenster zu lesen (Einzelheiten in der Datenschutzerklärung); nichts wird gespeichert oder gesendet außer der Zeit (ohne läuft alles, nur ohne mitlaufende Position).",
                                "“Local Network”: so LJL Link finds LJ Link in the booth. “Screen Recording”: LJL Link uses it only to read the time display in Serato's window (details in the privacy policy); nothing is stored or sent except the time (without it everything works, only without the running position)."))
@@ -37,8 +37,8 @@ struct WelcomePanel: View {
                      text: L.t("Alle Programme der Suite im selben Netzwerk – LJ Link in der Booth, VJ-Link – sind automatisch in einem Chatraum. Ihr könnt euch schreiben, ohne über die Tanzfläche zu rufen. Abschaltbar.",
                                "Every suite program in the same network – LJ Link in the booth, VJ-Link – is in one chat room by itself. Write to each other instead of shouting across the dance floor. Can be switched off."))
                 Step(icon: "power", title: L.t("Am Ende deines Sets", "At the end of your set"),
-                     text: L.t("„Beenden“ unten rechts (oder ⌘Q), dann den Stick abziehen. Fenster zu genügt nicht: LJL Link sendet dann aus der Menüleiste weiter.",
-                               "“Quit” at the bottom right (or ⌘Q), then unplug the stick. Closing the window is not enough: LJL Link keeps sending from the menu bar."))
+                     text: L.t("„Beenden“ unten rechts (oder ⌘Q); läuft es vom Stick, danach den Stick abziehen. Fenster zu genügt nicht: LJL Link sendet dann aus der Menüleiste weiter.",
+                               "“Quit” at the bottom right (or ⌘Q); running from a stick, unplug it afterwards. Closing the window is not enough: LJL Link keeps sending from the menu bar."))
             }
             .padding(.top, 4)
         }

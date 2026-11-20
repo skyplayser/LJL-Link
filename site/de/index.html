@@ -6,7 +6,7 @@
 <!-- English source of the site. The build (.github/scripts/build_site.py) makes de/index.html from the data-de*
      attributes and writes the sitemap. Elements with must contain plain text only. -->
 <title>LJL Link (LJ LAN Link) – Serato-Decks für die Lichtbooth (Alpha)</title>
-<meta name="description" content="Kostenlose Mac-App für DJs mit Serato DJ Pro: läuft vom USB-Stick des Clubs und schickt Track, Länge, BPM, Tonart, Waveforms in drei Bändern und die laufende Position jedes Decks an LJ Link in der Lichtbooth. Passiv, Tracknamen nur mit OK des DJs. Alpha.">
+<meta name="description" content="Kostenlose Mac-App für DJs mit Serato DJ Pro: findet LJ Link im Netzwerk selbst und schickt Track, Länge, BPM, Tonart, Waveforms in drei Bändern und die laufende Position jedes Decks an LJ Link in der Lichtbooth. Passiv, Tracknamen nur mit OK des DJs. Alpha.">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="author" content="SKYPLAYSER / NEXTPHILM">
 <link rel="canonical" href="https://skyplayser.github.io/LJL-Link/de/">
@@ -21,7 +21,7 @@
 <meta property="og:locale" content="de_DE">
 <meta property="og:locale:alternate" content="en_US">
 <meta property="og:title" content="LJL Link – deine Serato-Decks in der Lichtbooth">
-<meta property="og:description" content="Vom USB-Stick des Clubs zu LJ Link: Track, BPM, Tonart, Waveforms und Position jedes Serato-Decks. Nichts installieren, passiv, kostenlos. Alpha für macOS.">
+<meta property="og:description" content="Von deinem Mac oder dem USB-Stick des Clubs zu LJ Link: Track, BPM, Tonart, Waveforms und Position jedes Serato-Decks. Findet die Booth selbst, passiv, kostenlos. Alpha für macOS.">
 <meta property="og:image" content="https://skyplayser.github.io/LJL-Link/images/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -53,7 +53,7 @@
   <div class="hero">
     <img class="logo" src="../images/logo.png" alt="LJL Link logo" width="116" height="116">
     <h1><span class="kicker">LJL Link · LJ LAN Link</span><span>Deine Serato-Decks</span><br><span class="grad">in der Lichtbooth.</span></h1>
-    <p class="tag">Eine kleine Mac-App für DJs: Sie läuft vom USB-Stick des Clubs und zeigt LJ Link bei der Lichttechnik, was auf deinen Decks liegt – mit Waveform, BPM, Tonart und laufender Position. Nichts installieren, nichts an deinem Setup ändern.</p>
+    <p class="tag">Eine kleine Mac-App für DJs: Sie findet LJ Link bei der Lichttechnik selbst im Netzwerk und zeigt dort, was auf deinen Decks liegt – mit Waveform, BPM, Tonart und laufender Position. Vom Mac oder vom USB-Stick, nichts an deinem Setup ändern.</p>
     <div class="cta">
       <a class="btn primary" id="hero-download" href="#download">Alpha herunterladen</a>
       <a class="btn" href="#start">So funktioniert's</a>
@@ -65,9 +65,9 @@
     <p class="meta">Illustration mit Demo-Tracks. EMERGENCY ist keine Sicherheitstechnik.</p>
 
     <div class="flow" role="img" aria-label="DJ-Mac mit Serato DJ Pro und LJL Link, über das lokale Netzwerk zu LJ Link in der Lichtbooth">
-      <div class="node me"><small>Am DJ-Pult</small><b>Mac mit Serato DJ Pro</b><span>LJL Link startet vom USB-Stick des Clubs und liest mit, was auf den Decks liegt.</span><div class="rail" aria-hidden="true"><i style="background:#ff3b3b"></i><i style="background:#ffb020"></i><i style="background:#3ddc84"></i><i style="background:#22c8f0"></i><i style="background:#b45cff"></i></div></div>
+      <div class="node me"><small>Am DJ-Pult</small><b>Mac mit Serato DJ Pro</b><span>LJL Link startet vom Mac oder vom USB-Stick und liest mit, was auf den Decks liegt.</span><div class="rail" aria-hidden="true"><i style="background:#ff3b3b"></i><i style="background:#ffb020"></i><i style="background:#3ddc84"></i><i style="background:#22c8f0"></i><i style="background:#b45cff"></i></div></div>
       <div class="arrow" aria-hidden="true">→</div>
-      <div class="node"><small>Lokales Netzwerk</small><b>Club-Schlüssel aus club.json</b><span>Die Datei auf dem Stick sagt, wohin gesendet wird. Hat die Booth eine neue Adresse, findet LJL Link sie per Bonjour.</span></div>
+      <div class="node"><small>Lokales Netzwerk</small><b>Einmal erlauben</b><span>LJL Link findet LJ Link per Bonjour. Beim ersten Mal klickt die Lichttechnik „Erlauben“ – oder die club.json des Clubs öffnet die Tür.</span></div>
       <div class="arrow" aria-hidden="true">→</div>
       <div class="node"><small>In der Lichtbooth</small><b>LJ Link</b><span>Zeigt deine Decks mit Waveform, BPM, Tonart und Position – am Booth-Rechner und auf Tablets im Netzwerk.</span></div>
     </div>
@@ -90,13 +90,13 @@
     <h2>Gebaut für den DJ – und für die Booth</h2>
     <p class="lead">Serato DJ Pro bietet keine öffentliche Schnittstelle, über die LJ Link Decks, Waveforms und Position bekommen könnte. LJL Link liest auf deinem Mac mit und schickt der Lichttechnik genau das, was sie braucht, damit Licht und Effekte zu Drops und Breaks passen.</p>
     <div class="grid">
-      <div class="card"><h3><span class="ico">⏏</span><span>Läuft vom USB-Stick</span></h3><p>Der Club legt LJL Link auf seinen Stick. Du steckst ihn ein und startest die App – installiert wird nichts. Am Ende „Beenden“ (⌘Q) und den Stick abziehen.</p></div>
+      <div class="card"><h3><span class="ico">⏏</span><span>Vom Mac oder vom Stick</span></h3><p>Mit dem Link-Suite Launcher installieren oder direkt vom USB-Stick starten – LJL Link selbst installiert nichts. Am Ende „Beenden“ (⌘Q).</p></div>
       <div class="card"><h3><span class="ico">▤</span><span>Deine Decks in der Booth</span></h3><p>Welcher Track auf welchem Deck liegt, mit Länge, BPM und Tonart. Lädst du einen neuen Track, sieht die Booth ihn.</p></div>
       <div class="card"><h3><span class="ico">≋</span><span>Waveforms in drei Bändern</span></h3><p>Tiefen, Mitten und Höhen getrennt – als Übersicht über den ganzen Track und als Detail-Waveform. Berechnet auf deinem Mac; der Ton selbst verlässt ihn nie.</p></div>
       <div class="card"><h3><span class="ico" style="color:var(--green)">▶</span><span>Laufende Position</span></h3><p>LJL Link liest die Zeitanzeige im Serato-Fenster. So läuft die Waveform in LJ Link mit deinem Track mit. Dafür fragt macOS nach „Bildschirmaufnahme“; ohne diese Erlaubnis geht alles außer der Position.</p></div>
       <div class="card"><h3><span class="ico">◐</span><span>Du entscheidest über die Namen</span></h3><p>Beim Start fragt LJL Link, ob Tracknamen gesendet werden dürfen – jederzeit umschaltbar. Ohne dein OK verlassen Titel, Artists und Dateinamen deinen Mac nicht.</p></div>
       <div class="card"><h3><span class="ico">⊘</span><span>Passiv</span></h3><p>LJL Link steuert Serato nicht und fasst Controller und MIDI nicht an. Es liest nur Seratos Logdatei, den geladenen Track (für Waveform, BPM und Tonart) und die Zeitanzeige.</p></div>
-      <div class="card"><h3><span class="ico">⇄</span><span>Findet die Booth</span></h3><p>Die Datei club.json neben der App enthält Adresse und Club-Schlüssel des Clubs. Hat der Booth-Rechner eine neue Adresse, findet LJL Link LJ Link per Bonjour im Netzwerk; der Schlüssel entscheidet.</p></div>
+      <div class="card"><h3><span class="ico">⇄</span><span>Findet die Booth selbst</span></h3><p>LJL Link sucht LJ Link im lokalen Netzwerk. Beim ersten Mal klickt die Lichttechnik in LJ Link einmal auf „Erlauben“, danach kennt LJ Link deinen Mac. Mit der club.json des Clubs geht es ohne Nachfrage.</p></div>
       <div class="card"><h3><span class="ico">✉</span><span>Suite-Chat (Alpha)</span></h3><p>Ein Chatraum mit allen Suite-Programmen im Netzwerk – LJ Link, VJ-Link, LJL Link – ohne Server. Mit Name und Position. Der EMERGENCY-Knopf öffnet bei allen ein Popup unten rechts. Abschaltbar, nie gespeichert und nie im Log. Getestet auf einem Mac, noch nicht zwischen zwei Rechnern.</p></div>
       <div class="card"><h3><span class="ico">✓</span><span>Einfach für jeden DJ</span></h3><p>Ein Willkommensbildschirm erklärt alles vor der ersten Frage. Das Symbol in der Menüleiste zeigt, ob alles läuft. „Fehler melden“ direkt aus der App. Deutsch und Englisch.</p></div>
     </div>
@@ -122,25 +122,26 @@
 
   <section id="start">
     <p class="eyebrow">Los geht's</p>
-    <h2>In drei Schritten live</h2>
+    <h2>In vier Schritten live</h2>
     <ol class="steps">
-      <li><b>Stick vom Club</b><span>Die Lichttechnik legt LJL Link und die Datei club.json auf einen USB-Stick. Der Mac des DJs muss im selben Netzwerk sein wie LJ Link.</span></li>
-      <li><b>Starten</b><span>Stick einstecken, LJL Link starten. „Lokales Netzwerk“ und „Bildschirmaufnahme“ erlauben und die Frage nach den Tracknamen beantworten.</span></li>
+      <li><b>LJL Link holen</b><span>Mit dem Link-Suite Launcher oder auf dem USB-Stick des Clubs. Der Mac des DJs muss im selben Netzwerk sein wie LJ Link.</span></li>
+      <li><b>Starten</b><span>LJL Link starten. „Lokales Netzwerk“ und „Bildschirmaufnahme“ erlauben und die Frage nach den Tracknamen beantworten.</span></li>
+      <li><b>Freigabe</b><span>LJL Link findet LJ Link und fragt in der Booth an. Die Lichttechnik klickt in LJ Link einmal auf „Erlauben“ – danach ist dein Mac bekannt. Mit der club.json des Clubs entfällt dieser Schritt.</span></li>
       <li><b>Auflegen</b><span>Tracks in Serato laden wie immer. Deine Decks erscheinen in LJ Link. Am Ende „Beenden“ (⌘Q) – Fenster schließen reicht nicht, LJL Link sendet sonst aus der Menüleiste weiter.</span></li>
     </ol>
-    <div class="note"><b>Stick vorbereiten:</b> <span>Eine Funktion „Stick vorbereiten“ in LJ Link, die LJL Link und club.json auf den Stick schreibt, kommt noch. Bis dahin wird club.json von Hand angelegt – wie, steht in der Anleitung im LJ-Link-Wiki. Liegt keine club.json neben der App, kannst du sie in LJL Link auch auswählen.</span></div>
+    <div class="note"><b>Freigabe und club.json:</b> <span>LJ Link (ab 1.7.13) erkennt einen erlaubten Mac an einem Pseudonym – einem Code, der aus der Hardware-Kennung des Macs berechnet wird und für jedes LJ Link anders ist. Auf deinem Mac wird dafür nichts gespeichert. Die Lichttechnik kann einen Mac in LJ Link jederzeit entfernen. Optional bleibt die club.json des Clubs: Liegt sie neben der App oder wählst du sie in LJL Link aus, verbindet es ohne Nachfrage.</span></div>
     <p style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap"><a class="btn primary" href="https://skyplayser.github.io/LJ-Link/de/wiki-serato.html#ljl-link">Anleitung im LJ-Link-Wiki (Serato)</a> <a class="btn" href="https://skyplayser.github.io/LJ-Link/de/wiki-case-serato.html">Anwendungsfall: Serato auf dem DJ-Laptop</a></p>
   </section>
 
   <section id="download">
     <p class="eyebrow">Download</p>
     <h2>Kostenlos für macOS</h2>
-    <p class="lead"><span>Eine App für Apple silicon und Intel (Universal), ab macOS 14. In der Lichtbooth braucht es LJ Link ab Version 1.7.11 (mit dem Eingang für LJL Link).</span> <span id="dl-version"></span></p>
+    <p class="lead"><span>Eine App für Apple silicon und Intel (Universal), ab macOS 14. In der Lichtbooth braucht es LJ Link ab Version 1.7.13 (ohne club.json; mit club.json ab 1.7.11).</span> <span id="dl-version"></span></p>
     <div class="dl">
       <div class="card" data-os="mac"><h3>macOS · Apple silicon &amp; Intel</h3><p>Über den Link-Suite Launcher · macOS 14 oder neuer · Alpha</p><a class="btn primary" href="https://github.com/skyplayser/Link-Suite/releases/latest/download/Link-Suite-macos-arm64.dmg">Launcher · Apple silicon</a> <a class="btn" href="https://github.com/skyplayser/Link-Suite/releases/latest/download/Link-Suite-macos-intel.dmg">Launcher · Intel</a></div>
       <div class="card"><h3>Für die Booth: LJ Link</h3><p>macOS und Windows · kostenlos</p><a class="btn" href="https://skyplayser.github.io/LJ-Link/de/#download">LJ Link herunterladen</a></div>
     </div>
-    <div class="note"><b>Neu: LJL Link über den Link-Suite Launcher.</b> Der Launcher lädt LJL Link direkt aus dem offiziellen GitHub-Repo, prüft die Datei, installiert sie und hält sie aktuell. Für den Stick des Clubs bleibt alles wie bisher. <a href="https://skyplayser.github.io/Link-Suite/">Mehr zum Launcher →</a></div>
+    <div class="note"><b>Neu: LJL Link über den Link-Suite Launcher.</b> <span>Der Launcher lädt LJL Link direkt aus dem offiziellen GitHub-Repo, prüft die Datei, installiert sie und hält sie aktuell. Für einen USB-Stick lädt er LJL Link auch zum Mitnehmen.</span> <a href="https://skyplayser.github.io/Link-Suite/">Mehr zum Launcher →</a></div>
     <div class="note"><span>LJL Link ist ad-hoc signiert, aber noch nicht bei Apple notarisiert. Lädst du die App aus dem Internet, warnt macOS beim ersten Start.</span> <a href="#install">So öffnest du sie trotzdem →</a></div>
     <div class="note"><b>Im Live-Betrieb:</b> <span>LJL Link ist kostenlos, eine Alpha und ohne Gewähr. Software, Netzwerk und Geräte können ausfallen. Die Lichttechnik sollte immer einen Ausweg haben, zum Beispiel Tap-Tempo am Pult.</span></div>
     <p class="meta"><a href="https://github.com/skyplayser/LJL-Link/releases">Alle Versionen und Änderungen</a></p>
@@ -183,9 +184,9 @@
         <tr><th>Was</th><th>Stand</th></tr>
         <tr><td>Mac mit macOS 14 oder neuer, Apple silicon oder Intel</td><td class="part">Alpha; getestet auf einem Mac mit Apple silicon und aktuellem macOS, noch nicht auf Intel oder älterem macOS</td></tr>
         <tr><td>Serato DJ Pro</td><td class="part">Alpha, lokal getestet, noch nicht im Club</td></tr>
-        <tr><td>LJ Link in der Lichtbooth, ab Version 1.7.11</td><td class="part">Alpha</td></tr>
+        <tr><td>LJ Link in der Lichtbooth, ab Version 1.7.13 (mit club.json ab 1.7.11)</td><td class="part">Alpha</td></tr>
         <tr><td>Mac und Booth im selben lokalen Netzwerk</td><td class="plan">nötig</td></tr>
-        <tr><td>„Stick vorbereiten“ in LJ Link</td><td class="plan">geplant; bis dahin club.json von Hand</td></tr>
+        <tr><td>„Stick vorbereiten“ in LJ Link</td><td class="plan">geplant; club.json ist optional</td></tr>
         <tr><td>Windows, andere DJ-Software</td><td class="no">nicht unterstützt</td></tr>
       </table>
     </div>
@@ -212,7 +213,8 @@
     <p class="eyebrow">FAQ</p>
     <h2>Häufige Fragen</h2>
     <details><summary>Steuert LJL Link Serato oder meinen Controller?</summary><p>Nein. LJL Link ist passiv: Es liest nur Seratos Logdatei, den geladenen Track und die Zeitanzeige. Serato, Controller und MIDI fasst es nicht an.</p></details>
-    <details><summary>Muss ich etwas installieren?</summary><p>Nein. LJL Link läuft direkt vom USB-Stick des Clubs. macOS fragt nur nach „Lokales Netzwerk“ und „Bildschirmaufnahme“.</p></details>
+    <details><summary>Muss ich etwas installieren?</summary><p>Nicht zwingend. LJL Link läuft auch direkt vom USB-Stick; bequemer ist der Link-Suite Launcher, der es aktuell hält. macOS fragt nur nach „Lokales Netzwerk“ und „Bildschirmaufnahme“.</p></details>
+    <details><summary>Brauche ich eine club.json?</summary><p>Nein. Ohne club.json findet LJL Link LJ Link (ab 1.7.13) im Netzwerk, und die Lichttechnik erlaubt deinen Mac einmal mit einem Klick. Mit der club.json des Clubs entfällt das. LJ Link erkennt deinen Mac danach an einem Pseudonym; auf deinem Mac wird dafür nichts gespeichert.</p></details>
     <details><summary>Sieht die Booth meine Tracknamen?</summary><p>Nur, wenn du es erlaubst. LJL Link fragt beim Start, und du kannst es jederzeit umschalten. Ohne dein OK verlassen Titel, Artists und Dateinamen deinen Mac nicht; die Booth sieht dann nur, dass die Titel ausgeblendet sind.</p></details>
     <details><summary>Warum will LJL Link „Bildschirmaufnahme“?</summary><p>Serato DJ Pro bietet für die Abspielposition keine öffentliche Schnittstelle, die LJ Link nutzen könnte. LJL Link liest deshalb die Zeitanzeige im Serato-Fenster (Einzelheiten in der Datenschutzerklärung). Nichts wird gespeichert oder gesendet außer der Zeit. Ohne die Erlaubnis läuft alles, nur ohne mitlaufende Position.</p></details>
     <details><summary>Mein Mac sagt „LJL Link“ nicht geöffnet – was bedeutet das?</summary><p>LJL Link ist ad-hoc signiert, aber noch nicht bei Apple notarisiert. Deshalb kann macOS den Entwickler nicht prüfen. Lade LJL Link nur von GitHub (github.com/skyplayser/LJL-Link) oder dieser Seite. Wie du die App dann öffnest, steht oben unter „Erster Start“.</p></details>

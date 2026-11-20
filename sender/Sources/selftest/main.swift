@@ -2,6 +2,7 @@
 import AVFoundation
 import CoreGraphics
 import Foundation
+import Network
 import SenderCore
 
 var failures = 0
@@ -84,7 +85,7 @@ check((try? JSONDecoder().decode(ClubConfig.self, from: enc)) == club, "club.jso
 func obj(_ m: Message) -> [String: Any] {
     (try? JSONSerialization.jsonObject(with: m.json.data(using: .utf8)!) as? [String: Any]) ?? [:]
 }
-let hello = obj(.hello(key: "k", name: String(repeating: "x", count: 80), software: "Serato DJ Pro", app: "0.1", names: false))
+let hello = obj(.hello(key: "k", device: nil, name: String(repeating: "x", count: 80), software: "Serato DJ Pro", app: "0.1", names: false))
 check(hello["type"] as? String == "hello" && hello["protocol"] as? Int == 1, "hello carries protocol 1")
 check((hello["name"] as? String)?.count == 64, "name cut to 64 characters")
 check(hello["names"] as? Bool == false, "names flag sent")
@@ -97,6 +98,20 @@ check(obj(.waveform(deck: 2, id: "a", kind: "overview", entries: 1, data: [0, 0,
 check(Reply.parse(#"{"type":"welcome","protocol":1,"club":"Testclub","sender":"s1"}"#) == .welcome(club: "Testclub"), "welcome parsed")
 check(Reply.parse(#"{"type":"reject","reason":"key"}"#) == .reject(reason: "key"), "reject parsed")
 check(Reply.parse(#"{"type":"pong"}"#) == .pong, "pong parsed")
+check(Reply.parse(#"{"type":"pending"}"#) == .pending, "pending parsed")
+
+// MARK: Approval without club.json
+let noKey = obj(.hello(key: nil, device: "d1", name: "Mac", software: "Serato DJ Pro", app: "0.4", names: false))
+check(noKey["key"] == nil && noKey["device"] as? String == "d1", "hello without club.json: no key, with the pseudonym")
+check(obj(.hello(key: "k", device: nil, name: "Mac", software: "S", app: "0.4", names: false))["device"] == nil, "hello with key only has no device field")
+let d1 = Pairing.device(booth: "aaaa", secret: "uuid-1"), d2 = Pairing.device(booth: "bbbb", secret: "uuid-1")
+check(d1?.count == 32 && d1?.allSatisfy(\.isHexDigit) == true, "pseudonym is 32 hex digits")
+check(d1 == Pairing.device(booth: "aaaa", secret: "uuid-1"), "pseudonym is the same every time (nothing stored)")
+check(d1 != d2, "two LJ Links get different pseudonyms")
+check(d1 != Pairing.device(booth: "aaaa", secret: "uuid-2"), "two Macs get different pseudonyms")
+check(Pairing.device(booth: "") == nil, "no pseudonym without a booth id")
+check(Pairing.hardwareUUID?.isEmpty == false, "this Mac's hardware UUID can be read")
+check(Pairing.device(booth: "aaaa").map { !$0.contains(Pairing.hardwareUUID ?? "-") } == true, "the hardware UUID itself is not in the pseudonym")
 check(newTrackId().count == 12 && newTrackId() != newTrackId(), "track ids are random and short")
 
 // MARK: Time fields: parsing, assignment to decks, position tracking
@@ -537,6 +552,104 @@ if n1.start(r1) && n2.start(r2) {
 } else {
     check(false, "chat: multicast port \(SuiteChat.port) could not be opened")
 }
+
+// A small LJ Link on this Mac (WebSocket /sender) for the approval: without club.json, found "by Bonjour".
+final class MockBooth {
+    let listener: NWListener
+    var hellos: [[String: Any]] = []
+    var after: [String] = []
+    /// What to answer a hello: "pending-welcome", "pending-deny", "reject-key".
+    var mode = "pending-welcome"
+    let q = DispatchQueue(label: "mockbooth")
+    init() {
+        let ws = NWProtocolWebSocket.Options()
+        let p = NWParameters.tcp
+        p.defaultProtocolStack.applicationProtocols.insert(ws, at: 0)
+        listener = try! NWListener(using: p, on: .any)
+        listener.newConnectionHandler = { [unowned self] c in
+            c.start(queue: self.q)
+            self.read(c)
+        }
+        listener.start(queue: q)
+    }
+    var port: Int { Int(listener.port?.rawValue ?? 0) }
+    func send(_ c: NWConnection, _ text: String) {
+        let meta = NWProtocolWebSocket.Metadata(opcode: .text)
+        c.send(content: Data(text.utf8), contentContext: NWConnection.ContentContext(identifier: "t", metadata: [meta]), isComplete: true, completion: .idempotent)
+    }
+    func read(_ c: NWConnection) {
+        c.receiveMessage { [unowned self] data, _, _, err in
+            guard err == nil, let data, let o = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return }
+            let t = o["type"] as? String ?? ""
+            if t == "hello" {
+                self.hellos.append(o)
+                switch self.mode {
+                case "reject-key": self.send(c, #"{"type":"reject","reason":"key"}"#)
+                case "pending-deny":
+                    self.send(c, #"{"type":"pending"}"#)
+                    self.q.asyncAfter(deadline: .now() + 0.4) { self.send(c, #"{"type":"reject","reason":"denied"}"#) }
+                default:
+                    self.send(c, #"{"type":"pending"}"#)
+                    self.q.asyncAfter(deadline: .now() + 0.6) { self.send(c, #"{"type":"welcome","protocol":1,"club":"Mockclub","sender":"s1"}"#) }
+                }
+            } else {
+                self.after.append(t)
+                if t == "ping" { self.send(c, #"{"type":"pong"}"#) }
+            }
+            self.read(c)
+        }
+    }
+}
+func waitUntil(_ seconds: Double, _ ok: () -> Bool) -> Bool {
+    let end = Date().addingTimeInterval(seconds)
+    while Date() < end { if ok() { return true }; RunLoop.current.run(until: Date().addingTimeInterval(0.05)) }
+    return ok()
+}
+final class States: @unchecked Sendable { let l = NSLock(); var all: [Connection.State] = []
+    func add(_ s: Connection.State) { l.lock(); all.append(s); l.unlock() }
+    var list: [Connection.State] { l.lock(); defer { l.unlock() }; return all } }
+
+let booth = MockBooth()
+_ = waitUntil(3) { booth.port != 0 }
+func pairConn(_ states: States, pair: Bool = true) -> Connection {
+    let c = Connection(config: nil,
+                       hello: { key, device in .hello(key: key, device: device, name: "Test-Mac", software: "Serato DJ Pro", app: "0.4.0", names: false) },
+                       resend: { [.unload(deck: 3)] }, onState: { states.add($0) })
+    let place = Place(host: "127.0.0.1", port: booth.port, booth: "b00b5", pair: pair, name: "LJ Link (Mock)")
+    c.moreHosts = { [place] }
+    c.device = { Pairing.device(booth: $0, secret: "test-uuid") }
+    return c
+}
+let s1 = States()
+let c1 = pairConn(s1)
+c1.start()
+check(waitUntil(5) { s1.list.contains(.connected(club: "Mockclub")) }, "approval: without club.json LJL Link finds LJ Link and is let in after the LJ allows it (\(s1.list))")
+check(s1.list.contains(.pending("LJ Link (Mock)")), "approval: the DJ sees that the booth is asked")
+check(booth.hellos.first?["key"] == nil && booth.hellos.first?["device"] as? String == Pairing.device(booth: "b00b5", secret: "test-uuid"),
+      "approval: hello without key, with the pseudonym for this LJ Link")
+check(waitUntil(2) { booth.after.contains("unload") }, "approval: after the welcome the deck state is sent")
+c1.stop()
+
+booth.mode = "pending-deny"; booth.hellos = []
+let s2 = States()
+let c2 = pairConn(s2)
+c2.start()
+check(waitUntil(5) { s2.list.contains(.rejected("denied")) }, "approval: the LJ says no -> the DJ sees it (\(s2.list))")
+c2.stop()
+
+booth.mode = "reject-key"; booth.hellos = []
+let s3 = States()
+let c3 = pairConn(s3, pair: false)
+c3.start()
+check(waitUntil(5) { s3.list.contains(.rejected("old")) }, "approval: an LJ Link that cannot approve yet is reported as too old (\(s3.list))")
+check(booth.hellos.first?["device"] == nil, "approval: no pseudonym to an LJ Link without pair=1")
+c3.stop()
+
+let s4 = States()
+let c4 = Connection(config: nil, hello: { _, _ in .ping }, resend: { [] }, onState: { s4.add($0) })
+c4.start()
+check(waitUntil(2) { s4.list.contains(.searching) }, "approval: nothing found yet -> 'looking for LJ Link'")
+c4.stop()
 
 try? FileManager.default.removeItem(at: tmp)
 print(failures == 0 ? "all checks passed" : "\(failures) check(s) failed")

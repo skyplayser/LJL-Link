@@ -4,7 +4,8 @@ import Foundation
 public enum Message {
     public static let protocolVersion = 1
 
-    case hello(key: String, name: String, software: String, app: String, names: Bool)
+    /// `key` from club.json, `device` the pseudonym for an LJ Link that can approve (Pairing); either may be missing.
+    case hello(key: String?, device: String?, name: String, software: String, app: String, names: Bool)
     case load(deck: Int, id: String, lengthMs: Int64, bpm: Double?, key: String?, title: String?, artist: String?)
     case waveform(deck: Int, id: String, kind: String, entries: Int, data: [UInt8])
     case position(deck: Int, id: String, ms: Int64?, playing: Bool, speed: Double?, source: String)
@@ -16,9 +17,11 @@ public enum Message {
     public var json: String {
         var o: [String: Any]
         switch self {
-        case let .hello(key, name, software, app, names):
-            o = ["type": "hello", "protocol": Message.protocolVersion, "key": key, "name": String(name.prefix(64)),
+        case let .hello(key, device, name, software, app, names):
+            o = ["type": "hello", "protocol": Message.protocolVersion, "name": String(name.prefix(64)),
                  "software": software, "app": app, "names": names]
+            if let key, !key.isEmpty { o["key"] = key }
+            if let device { o["device"] = device }
         case let .load(deck, id, lengthMs, bpm, key, title, artist):
             o = ["type": "load", "deck": deck, "id": id, "lengthMs": lengthMs]
             if let bpm { o["bpm"] = bpm }
@@ -49,6 +52,8 @@ public enum Message {
 /// What LJ Link answers.
 public enum Reply: Equatable {
     case welcome(club: String)
+    /// LJ Link asks the LJ whether this Mac may send (approval without club.json).
+    case pending
     case reject(reason: String)
     case pong
     case other(String)
@@ -59,6 +64,7 @@ public enum Reply: Equatable {
               let t = o["type"] as? String else { return .other(text) }
         switch t {
         case "welcome": return .welcome(club: o["club"] as? String ?? "")
+        case "pending": return .pending
         case "reject": return .reject(reason: o["reason"] as? String ?? "")
         case "pong": return .pong
         default: return .other(t)
